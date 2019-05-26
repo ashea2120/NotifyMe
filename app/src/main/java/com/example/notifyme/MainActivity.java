@@ -3,7 +3,12 @@ package com.example.notifyme;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -28,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
     private NotificationManager mNotifyManager;
 
-    //private NotificationReceiver mReceiver = new NotificationReceiver();
+    private NotificationReceiver mReceiver = new NotificationReceiver();
 
 
     @Override
@@ -39,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
         // Create the notification channel.
         createNotificationChannel();
 
+        registerReceiver(mReceiver,new IntentFilter(ACTION_UPDATE_NOTIFICATION));
+
         button_notify = findViewById(R.id.notify);
         button_notify.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -46,6 +53,55 @@ public class MainActivity extends AppCompatActivity {
                 sendNotification();
             }
         });
+
+        button_update = findViewById(R.id.update);
+        button_update.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //Update the notification
+                updateNotification();
+            }
+        });
+
+        button_cancel = findViewById(R.id.cancel);
+        button_cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //Cancel the notification
+                cancelNotification();
+            }
+        });
+        setNotificationButtonState(true, false, false);
+    }
+
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(mReceiver);
+        super.onDestroy();
+    }
+
+    void setNotificationButtonState(Boolean isNotifyEnabled,
+                                    Boolean isUpdateEnabled,
+                                    Boolean isCancelEnabled) {
+        button_notify.setEnabled(isNotifyEnabled);
+        button_update.setEnabled(isUpdateEnabled);
+        button_cancel.setEnabled(isCancelEnabled);
+    }
+
+    public void updateNotification() {
+        Bitmap androidImage = BitmapFactory
+                .decodeResource(getResources(),R.drawable.mascot_1);
+        NotificationCompat.Builder notifyBuilder = getNotificationBuilder();
+        notifyBuilder.setStyle(new NotificationCompat.BigPictureStyle()
+                .bigPicture(androidImage)
+                .setBigContentTitle("Notification Updated!"));
+        mNotifyManager.notify(NOTIFICATION_ID, notifyBuilder.build());
+        setNotificationButtonState(false, false, true);
+
+    }
+    public void cancelNotification() {
+        mNotifyManager.cancel(NOTIFICATION_ID);
+        setNotificationButtonState(true, false, false);
     }
 
     private NotificationCompat.Builder getNotificationBuilder(){
@@ -63,8 +119,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void sendNotification() {
+        Intent updateIntent = new Intent(ACTION_UPDATE_NOTIFICATION);
+        PendingIntent updatePendingIntent = PendingIntent.getBroadcast
+                (this, NOTIFICATION_ID, updateIntent, PendingIntent.FLAG_ONE_SHOT);
+
         NotificationCompat.Builder notifyBuilder = getNotificationBuilder();
         mNotifyManager.notify(NOTIFICATION_ID, notifyBuilder.build());
+        setNotificationButtonState(false, true, true);
+        notifyBuilder.addAction(R.drawable.ic_update, "Update Notification", updatePendingIntent);
     }
 
     public void createNotificationChannel()
@@ -82,6 +144,17 @@ public class MainActivity extends AppCompatActivity {
             notificationChannel.enableVibration(true);
             notificationChannel.setDescription("Notification from Mascot");
             mNotifyManager.createNotificationChannel(notificationChannel);
+        }
+    }
+
+    public class NotificationReceiver extends BroadcastReceiver {
+
+        public NotificationReceiver() {
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Update the notification
         }
     }
 }
