@@ -2,7 +2,7 @@
 ---
 This repository is for Lab 7 submission.
  
-## 1.1 Pets App w/ Database
+## 1.1 Notify Me
  
 This repo is for the following Practice Set:
 - CodeLabs Android Fundamentals 08.1: Notifications 
@@ -14,5 +14,6 @@ A short description about the issues that you faced and the lessons that you lea
 - Experimented with different notification styles, actions, and priorities
 - Learned that a notification channel is needed to deal with notifications and in order to use them, at least one channel must be implemented
 - Learned how to implement all of these different styles, actions, and priorities in code and proper coding techniques for it
+- Also learned how to add pictures to notifications, but only when swiped down on 
 ---
 Written by Ashley Shea
